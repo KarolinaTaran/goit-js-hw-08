@@ -65,42 +65,50 @@ const images = [
 ];
 
 const galleryElements = document.querySelector(".gallery");
-const fragment = document.createDocumentFragment();
-images.forEach((imageItem) => {
-  const imgElement = document.createElement("img");
-  imgElement.classList.add("gallery-image");
-  imgElement.src = imageItem.preview;
-  imgElement.alt = imageItem.description;
-
-  const aElement = document.createElement("a");
-  aElement.classList.add("gallery-link");
-  aElement.href = imageItem.original;
-  aElement.append(imgElement);
-
-  const liElement = document.createElement("li");
-  liElement.classList.add("gallery-item");
-  liElement.append(aElement);
-  fragment.append(liElement);
-});
-galleryElements.append(fragment);
-
+const markup = images
+  .map(
+    (imageItem) =>
+      `<li class="gallery-item">
+    <a class="gallery-link" href="${imageItem.preview}">
+      <img
+        class="gallery-image"
+        src="${imageItem.preview}"
+        data-source="${imageItem.original}"
+        alt="${imageItem.description}"
+      />
+    </a>
+  </li>`
+  )
+  .join("");
+galleryElements.insertAdjacentHTML("beforeend", markup);
+let lightbox;
 galleryElements.addEventListener("click", (event) => {
   event.preventDefault();
-  if (event.target.tagName === "IMG") {
-    const image = images.find((img) => img.preview === event.target.src);
-    if (image) {
-      console.log(image.original);
-      const lightbox = basicLightbox.create(`
-    <img src="${image.original}">
-`);
-      lightbox.show();
-      document.addEventListener("keydown", handleKeyPress);
+  if (event.target.tagName !== "IMG") {
+    return;
+  }
+  const image = images.find((img) => img.preview === event.target.src);
 
-      function handleKeyPress(event) {
-        if (event.keyCode === 27) {
-          lightbox.close();
-        }
+  if (image) {
+    lightbox = basicLightbox.create(
+      `
+    <img src="${image.original}" alt="${image.description}">
+`,
+      {
+        onShow: () => {
+          document.addEventListener("keydown", handleKeyPress);
+        },
+        onClose: () => {
+          document.removeEventListener("keydown", handleKeyPress);
+        },
       }
-    }
+    );
+    lightbox.show();
   }
 });
+
+function handleKeyPress(event) {
+  if (event.keyCode === 27) {
+    lightbox.close();
+  }
+}
