@@ -69,7 +69,7 @@ const markup = images
   .map(
     (imageItem) =>
       `<li class="gallery-item">
-    <a class="gallery-link" href="${imageItem.preview}">
+    <a class="gallery-link" href="${imageItem.original}">
       <img
         class="gallery-image"
         src="${imageItem.preview}"
@@ -87,7 +87,9 @@ galleryElements.addEventListener("click", (event) => {
   if (event.target.tagName !== "IMG") {
     return;
   }
-  const image = images.find((img) => img.preview === event.target.src);
+  const image = images.find(
+    (img) => img.original === event.target.dataset.source
+  );
 
   if (image) {
     lightbox = basicLightbox.create(
@@ -108,7 +110,7 @@ galleryElements.addEventListener("click", (event) => {
 });
 
 function handleKeyPress(event) {
-  if (event.keyCode === 27) {
+  if (event.key === "Escape") {
     lightbox.close();
   }
 }
